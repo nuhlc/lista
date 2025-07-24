@@ -153,17 +153,21 @@
       const evento = eventoInput.value;
       const horario = new Date().toLocaleString("pt-BR");
 
-      const payload = { nome, codigo, evento, horario };
+      // ✅ Formato que evita CORS (x-www-form-urlencoded)
+      const formData = new URLSearchParams();
+      formData.append("nome", nome);
+      formData.append("codigo", codigo);
+      formData.append("evento", evento);
+      formData.append("horario", horario);
 
       const response = await fetch("https://script.google.com/macros/s/AKfycbwHk6o909wUncUcY0g0nRgJSpiZ-ZI7MtZjxMRCTrVU2yh9zm_M9uULA6SBYnTcuL0mEw/exec", {
         method: "POST",
-        body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" }
+        body: formData
       });
 
       if (response.ok) {
         msg.textContent = "Presença registrada com sucesso!";
-        exibirNaTabela(payload);
+        exibirNaTabela({ nome, codigo, evento, horario });
         form.reset();
         nomeInput.value = "";
         codigoInput.value = "";
