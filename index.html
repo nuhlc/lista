@@ -117,6 +117,9 @@
     </table>
   </div>
 
+  <!-- 🔊 BIP DE CONFIRMAÇÃO -->
+  <audio id="bip" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
   <script>
     const form = document.getElementById('form');
     const nomeInput = document.getElementById('nome');
@@ -153,7 +156,6 @@
       const evento = eventoInput.value;
       const horario = new Date().toLocaleString("pt-BR");
 
-      // ✅ Formato que evita CORS (x-www-form-urlencoded)
       const formData = new URLSearchParams();
       formData.append("nome", nome);
       formData.append("codigo", codigo);
@@ -185,6 +187,9 @@
         <td>${evento}</td>
       `;
       registrosTabela.prepend(tr);
+
+      // 🔊 Toca o bip após inserir
+      document.getElementById("bip").play();
     }
   </script>
 </body>
