@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <base target="_top" />
+  <title>Leitor de QR Code</title>
+  <script src="html5-qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    label, select, input, button {
+      display: block;
+      margin-top: 10px;
+      width: 100%;
+      max-width: 300px;
+    }
+    #reader {
+      width: 300px;
+      margin-bottom: 20px;
+    }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    #baixar {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Leitor de QR Code</h2>
+  <div id="reader"></div>
+
+  <form id="qrForm">
+    <label for="nome">Nome:</label>
+    <input type="text" name="nome" id="nome" required />
+
+    <label for="codigo">Código:</label>
+    <input type="text" name="codigo" id="codigo" required />
+
+    <label for="evento">Evento:</label>
+    <select name="evento" id="evento" required>
+      <option value="">Selecione...</option>
+      <option value="MR 1">Mesa-Redonda 1</option>
+      <option value="MR 2">Mesa-Redonda 2</option>
+      <option value="MR 3">Mesa-Redonda 3</option>
+      <option value="ST 1">Simpósio Temático 1</option>
+      <option value="ST 2">Simpósio Temático 2</option>
+      <option value="ST 3">Simpósio Temático 3</option>
+      <option value="ST 4">Simpósio Temático 4</option>
+      <option value="ST 5">Simpósio Temático 5</option>
+      <option value="ST 6">Simpósio Temático 6</option>
+      <option value="ST 7">Simpósio Temático 7</option>
+      <option value="ST 8">Simpósio Temático 8</option>
+      <option value="MC 1">Minicurso 1</option>
+      <option value="MC 2">Minicurso 2</option>
+      <option value="MC 3">Minicurso 3</option>
+      <option value="MC 4">Minicurso 4</option>
+      <option value="MC 5">Minicurso 5</option>
+      <option value="MC 6">Minicurso 6</option>
+      <option value="MC 7">Minicurso 7</option>
+      <option value="MC 8">Minicurso 8</option>
+      <option value="MC 9">Minicurso 9</option>
+    </select>
+
+    <button type="submit">Salvar</button>
+  </form>
+
+  <button id="baixar">Baixar CSV</button>
+  <p id="status"></p>
+
+  <script>
+    const reader = new Html5Qrcode("reader");
+    const config = { fps: 10, qrbox: 250 };
+
+    reader.start(
+      { facingMode: "environment" },
+      config,
+      (decodedText) => {
+        try {
+          const data = JSON.parse(decodedText);
+          document.getElementById("nome").value = data.nome || "";
+          document.getElementById("codigo").value = data.codigo || "";
+          document.getElementById("status").innerText = "QR Code lido com sucesso!";
+        } catch (e) {
+          alert("QR inválido.");
+          document.getElementById("status").innerText = "QR inválido.";
+        }
+      },
+      (error) => {
+        // silencioso
+      }
+    );
+
+    const salvarCSVLocal = (nome, codigo, evento, dataHora) => {
+      let registros = localStorage.getItem("presencasCSV") || "Nome,Código,Evento,Data/Hora\n";
+      registros += `"${nome}","${codigo}","${evento}","${dataHora}"\n`;
+      localStorage.setItem("presencasCSV", registros);
+    };
+
+    document.getElementById("qrForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const nome = document.getElementById("nome").value.trim();
+      const codigo = document.getElementById("codigo").value.trim();
+      const evento = document.getElementById("evento").value;
+      const dataHora = new Date().toLocaleString();
+
+      if (!nome || !codigo || !evento) {
+        alert("Preencha todos os campos.");
+        return;
+      }
+
+      salvarCSVLocal(nome, codigo, evento, dataHora);
+
+      document.getElementById("status").innerText = "Presença registrada com sucesso!";
+      document.getElementById("qrForm").reset(); // Limpa os campos
+    });
+
+    document.getElementById("baixar").addEventListener("click", () => {
+      const csv = localStorage.getItem("presencasCSV") || "";
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.setAttribute("href", URL.createObjectURL(blob));
+      link.setAttribute("download", "presencas.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>
