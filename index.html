@@ -172,16 +172,32 @@
       }
     });
 
-    function exibirNaTabela({ nome, codigo, evento, horario }) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${horario}</td>
-        <td>${nome}</td>
-        <td>${codigo}</td>
-        <td>${evento}</td>
-      `;
-      registrosTabela.prepend(tr);
-    }
-  </script>
+<script>
+  function exibirNaTabela({ nome, codigo, evento, horario }) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${horario}</td>
+      <td>${nome}</td>
+      <td>${codigo}</td>
+      <td>${evento}</td>
+    `;
+    registrosTabela.prepend(tr);
+  }
+
+  function testarTabela() {
+    const teste = {
+      nome: "Nome de Teste",
+      codigo: "XYZ123",
+      evento: "MC2",
+      horario: new Date().toLocaleString("pt-BR")
+    };
+    exibirNaTabela(teste);
+  }
+</script>
+
+<!-- ✅ Coloque o botão aqui, fora do <script> -->
+<button onclick="testarTabela()" style="margin-top:20px;">[TESTE] Adicionar Registro Simulado</button>
+
 </body>
 </html>
+
