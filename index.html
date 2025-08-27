@@ -13,105 +13,37 @@
       --text: #333;
       --border: #ddd;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      padding: 20px;
-      margin: 0;
+      padding: 20px; margin: 0;
     }
-
     #container {
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      padding: 20px;
+      max-width: 600px; margin: auto; background: #fff; border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px;
     }
-
-    #logo {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    #logo img {
-      max-width: 80%;
-      height: auto;
-    }
-
-    h2 {
-      text-align: center;
-      color: var(--primary);
-    }
-
-    form {
-      margin-top: 20px;
-    }
-
+    #logo { text-align: center; margin-bottom: 20px; }
+    #logo img { max-width: 80%; height: auto; }
+    h2 { text-align: center; color: var(--primary); }
+    form { margin-top: 20px; }
     input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      font-size: 14px;
+      width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px;
+      border: 1px solid var(--border); font-size: 14px;
     }
-
     button {
-      background-color: var(--primary);
-      color: #fff;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s ease;
+      background-color: var(--primary); color: #fff; font-weight: 600;
+      border: none; cursor: pointer; transition: background 0.2s ease;
     }
-
-    button:hover {
-      background-color: #1565c0;
-    }
-
-    #reader {
-      width: 100%;
-      margin: auto;
-      margin-top: 20px;
-    }
-
-    #msg {
-      margin-top: 10px;
-      font-weight: 600;
-      color: green;
-    }
-
-    #lista-registros {
-      margin-top: 30px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      margin-top: 10px;
-    }
-
-    th, td {
-      border: 1px solid var(--border);
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f1f1f1;
-    }
-
-    audio {
-      display: none;
-    }
+    button:hover { background-color: #1565c0; }
+    #reader { width: 100%; margin: 20px auto 0; }
+    #msg { margin-top: 10px; font-weight: 600; color: green; }
+    #lista-registros { margin-top: 30px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+    th { background-color: #f1f1f1; }
+    audio { display: none; }
   </style>
 </head>
 <body>
@@ -124,39 +56,14 @@
     <div id="reader"></div>
 
     <form id="form">
+      <!-- Nome e Código agora vêm da URL (readonly) -->
       <input type="text" id="nome" name="nome" placeholder="Nome" required readonly>
-      <input type="text" id="codigo" name="codigo" placeholder="Código" required readonly>
+      <input type="text" id="codigo" name="codigo" placeholder="Código (memberId)" required readonly>
 
-      <label for="evento">Modalidade do Evento:</label>
-      <select id="evento" name="evento" required>
-        <option value="">Selecione</option>
-        <optgroup label="Mesas Redondas">
-          <option value="MR1">MR1</option>
-          <option value="MR2">MR2</option>
-          <option value="MR3">MR3</option>
-        </optgroup>
-        <optgroup label="Simpósios Temáticos">
-          <option value="ST1">ST1</option>
-          <option value="ST2">ST2</option>
-          <option value="ST3">ST3</option>
-          <option value="ST4">ST4</option>
-          <option value="ST5">ST5</option>
-          <option value="ST6">ST6</option>
-          <option value="ST7">ST7</option>
-          <option value="ST8">ST8</option>
-        </optgroup>
-        <optgroup label="Minicursos">
-          <option value="MC1">MC1</option>
-          <option value="MC2">MC2</option>
-          <option value="MC3">MC3</option>
-          <option value="MC4">MC4</option>
-          <option value="MC5">MC5</option>
-          <option value="MC6">MC6</option>
-          <option value="MC7">MC7</option>
-          <option value="MC8">MC8</option>
-          <option value="MC9">MC9</option>
-        </optgroup>
-      </select>
+      <!-- Substituí o SELECT de evento por um input readonly
+           que será preenchido pelo QR do EVENTO -->
+      <label for="evento">Evento (QR):</label>
+      <input type="text" id="evento" name="evento" placeholder="Aproxime o QR do evento" required readonly>
 
       <button type="submit">Enviar</button>
     </form>
@@ -191,32 +98,51 @@
     const msg = document.getElementById('msg');
     const registrosTabela = document.getElementById('tabela-registros');
 
+    // ========= [NOVO] Pré-preencher a partir da URL: ?name=...&code=... =========
+    (function prefillFromURL() {
+      const params = new URLSearchParams(location.search);
+      const nomeURL = params.get('name') || '';
+      const codigoURL = params.get('code') || '';
+      if (nomeURL)  nomeInput.value = nomeURL;
+      if (codigoURL) codigoInput.value = codigoURL;
+      // Se quiser exigir que venham por URL, descomente:
+      // if (!nomeURL || !codigoURL) alert('Atenção: nome e código não vieram na URL.');
+    })();
+
+    // ========= Leitura do QR agora é do EVENTO =========
     function onScanSuccess(decodedText, decodedResult) {
       try {
         const data = JSON.parse(decodedText);
+
+        // Espera-se que o QR do evento venha como:
+        // {"nome":"NOME_DO_EVENTO","codigo":"DIA_OU_COD_DO_EVENTO"}
         if (data.nome && data.codigo) {
-          nomeInput.value = data.nome;
-          codigoInput.value = data.codigo;
+          // Preenche o campo "evento" com NOME + DIA/CÓDIGO
+          eventoInput.value = `${data.nome} - ${data.codigo}`;
+          document.getElementById("bip").play();
+          msg.textContent = "Evento lido com sucesso!";
         } else {
-          alert("Formato inválido de QR Code");
+          alert("QR do evento inválido. Esperado {\"nome\":\"...\",\"codigo\":\"...\"}");
         }
       } catch (e) {
-        alert("Erro ao ler o QR Code");
+        alert("Erro ao ler o QR do evento");
       }
     }
 
+    // Inicializa o leitor
     new Html5Qrcode("reader").start(
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       onScanSuccess
     );
 
+    // ========= Envio ao Apps Script (mantido) =========
     form.addEventListener("submit", async function(e) {
       e.preventDefault();
 
-      const nome = nomeInput.value;
-      const codigo = codigoInput.value;
-      const evento = eventoInput.value;
+      const nome = nomeInput.value;     // do URL
+      const codigo = codigoInput.value; // do URL (memberId)
+      const evento = eventoInput.value; // do QR (nome-evento + dia-código)
       const horario = new Date().toLocaleString("pt-BR");
 
       const formData = new URLSearchParams();
@@ -233,9 +159,10 @@
       if (response.ok) {
         msg.textContent = "Presença registrada com sucesso!";
         exibirNaTabela({ nome, codigo, evento, horario });
-        form.reset();
-        nomeInput.value = "";
-        codigoInput.value = "";
+
+        // NÃO limpamos nome/codigo (para facilitar múltiplos registros do mesmo participante)
+        // Apenas limpamos o evento para ler o próximo QR do evento
+        eventoInput.value = "";
       } else {
         msg.textContent = "Erro ao enviar. Tente novamente.";
       }
